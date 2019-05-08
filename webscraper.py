@@ -1,14 +1,19 @@
 from bs4 import BeautifulSoup
 import requests
-
+import json
 url = 'http://ethans_fake_twitter_site.surge.sh/'
 response = requests.get(url, timeout=5)
 content = BeautifulSoup(response.content, "html.parser")
-tweet = content.findAll('div', attrs ={"class":"tweetcontainer"})
-
-for t in tweet:
-    tObject = {
-        "author":t.find('h2', attrs={"class":"author"}).text.encode('utf-8'),
-        "tweet": t.find('p', attrs ={"class":"content"}).text.encode('utf-8')
+tweetArr = []
+for tweet in content.findAll('div', attrs={"class": "tweetcontainer"}):
+    tweetObject = {
+        "author": tweet.find('h2', attrs={"class": "author"}).text,
+        "date": tweet.find('h5', attrs={"class": "dateTime"}).text,
+        "tweet": tweet.find('p', attrs={"class": "content"}).text,
+        "likes": tweet.find('p', attrs={"class": "likes"}).text,
+        "shares": tweet.find('p', attrs={"class": "shares"}).text
     }
-    print(tObject)
+
+    tweetArr.append(tweetObject)
+with open('twitterData.txt', 'w') as outfile:
+    json.dump(tweetArr, outfile)
